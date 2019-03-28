@@ -1,10 +1,9 @@
-from __future__ import absolute_import
-
 from unittest import TestCase
-from nose.tools import eq_
 from lintreview.review import Problems, Comment
 from lintreview.tools.py3k import Py3k
-from tests import root_dir, requires_image
+from tests import root_dir
+
+import pytest
 
 
 class TestPy3k(TestCase):
@@ -24,52 +23,52 @@ class TestPy3k(TestCase):
         self.assertTrue(self.tool.match_file('test.py'))
         self.assertTrue(self.tool.match_file('dir/name/test.py'))
 
-    @requires_image('python2')
+    @pytest.mark.requires_linters
     def test_process_files__one_file_pass(self):
         self.tool.process_files([self.fixtures.no_errors])
-        eq_([], self.problems.all(self.fixtures.no_errors))
+        self.assertEqual([], self.problems.all(self.fixtures.no_errors))
 
-    @requires_image('python2')
+    @pytest.mark.requires_linters
     def test_process_files__one_file_fail(self):
         self.tool.process_files([self.fixtures.has_errors])
         problems = self.problems.all(self.fixtures.has_errors)
-        eq_(2, len(problems))
+        self.assertEqual(2, len(problems))
 
         fname = self.fixtures.has_errors
-        eq_([
+        self.assertEqual([
             Comment(fname, 6, 6, 'E1601 print statement used'),
             Comment(fname, 11, 11,
                     'W1638 range built-in referenced when not iterating')
         ], problems)
 
-    @requires_image('python2')
+    @pytest.mark.requires_linters
     def test_process_files__config_option_str(self):
         tool = Py3k(self.problems, {'ignore': 'W1638,E1601'}, root_dir)
         tool.process_files([self.fixtures.has_errors])
         problems = self.problems.all(self.fixtures.has_errors)
-        eq_(0, len(problems))
+        self.assertEqual(0, len(problems))
 
-    @requires_image('python2')
+    @pytest.mark.requires_linters
     def test_process_files__config_option_list(self):
         tool = Py3k(self.problems,
                     {'ignore': ['W1638', 'E1601']},
                     root_dir)
         tool.process_files([self.fixtures.has_errors])
         problems = self.problems.all(self.fixtures.has_errors)
-        eq_(0, len(problems))
+        self.assertEqual(0, len(problems))
 
-    @requires_image('python2')
+    @pytest.mark.requires_linters
     def test_process_files_two_files(self):
         self.tool.process_files([self.fixtures.no_errors,
                                  self.fixtures.has_errors])
 
-        eq_([], self.problems.all(self.fixtures.no_errors))
+        self.assertEqual([], self.problems.all(self.fixtures.no_errors))
 
         problems = self.problems.all(self.fixtures.has_errors)
-        eq_(2, len(problems))
+        self.assertEqual(2, len(problems))
 
         fname = self.fixtures.has_errors
-        eq_([
+        self.assertEqual([
             Comment(fname, 6, 6, 'E1601 print statement used'),
             Comment(fname, 11, 11,
                     'W1638 range built-in referenced when not iterating')

@@ -1,11 +1,12 @@
-from __future__ import absolute_import
+from unittest import TestCase
+
 from lintreview.review import Comment, Problems
 from lintreview.tools.rubocop import Rubocop
 from tests import (
-    root_dir, requires_image, read_file, read_and_restore_file
+    root_dir, read_file, read_and_restore_file
 )
-from unittest import TestCase
-from nose.tools import eq_, assert_in
+
+import pytest
 
 
 class TestRubocop(TestCase):
@@ -25,12 +26,12 @@ class TestRubocop(TestCase):
         self.assertTrue(self.tool.match_file('test.rb'))
         self.assertTrue(self.tool.match_file('dir/name/test.rb'))
 
-    @requires_image('ruby2')
+    @pytest.mark.requires_linters
     def test_process_files__one_file_pass(self):
         self.tool.process_files([self.fixtures[0]])
-        eq_([], self.problems.all(self.fixtures[0]))
+        self.assertEqual([], self.problems.all(self.fixtures[0]))
 
-    @requires_image('ruby2')
+    @pytest.mark.requires_linters
     def test_process_files__one_file_fail(self):
         self.tool.process_files([self.fixtures[1]])
 
@@ -40,19 +41,19 @@ class TestRubocop(TestCase):
             4,
             4,
             'C: Trailing whitespace detected.')
-        eq_(expected, problems[1])
+        self.assertEqual(expected, problems[1])
 
-    @requires_image('ruby2')
+    @pytest.mark.requires_linters
     def test_process_files_two_files(self):
         self.tool.process_files(self.fixtures)
 
         linty_filename = self.fixtures[1]
-        eq_(2, len(self.problems.all(linty_filename)))
+        self.assertEqual(2, len(self.problems.all(linty_filename)))
 
         freshly_laundered_filename = self.fixtures[0]
-        eq_([], self.problems.all(freshly_laundered_filename))
+        self.assertEqual([], self.problems.all(freshly_laundered_filename))
 
-    @requires_image('ruby2')
+    @pytest.mark.requires_linters
     def test_process_files_one_file_fail_display_cop_names(self):
         options = {
             'display_cop_names': 'True',
@@ -67,9 +68,9 @@ class TestRubocop(TestCase):
             4,
             4,
             'C: Layout/TrailingWhitespace: Trailing whitespace detected.')
-        eq_(expected, problems[1])
+        self.assertEqual(expected, problems[1])
 
-    @requires_image('ruby2')
+    @pytest.mark.requires_linters
     def test_process_files_one_file_fail_display_cop_names__bool(self):
         options = {
             'display_cop_names': True,
@@ -84,17 +85,17 @@ class TestRubocop(TestCase):
             4,
             4,
             'C: Layout/TrailingWhitespace: Trailing whitespace detected.')
-        eq_(expected, problems[1])
+        self.assertEqual(expected, problems[1])
 
     def test_has_fixer__not_enabled(self):
         tool = Rubocop(self.problems, {}, root_dir)
-        eq_(False, tool.has_fixer())
+        self.assertEqual(False, tool.has_fixer())
 
     def test_has_fixer__enabled(self):
         tool = Rubocop(self.problems, {'fixer': True}, root_dir)
-        eq_(True, tool.has_fixer())
+        self.assertEqual(True, tool.has_fixer())
 
-    @requires_image('ruby2')
+    @pytest.mark.requires_linters
     def test_execute_fixer(self):
         tool = Rubocop(self.problems, {'fixer': True}, root_dir)
 
@@ -103,9 +104,9 @@ class TestRubocop(TestCase):
 
         updated = read_and_restore_file(self.fixtures[1], original)
         assert original != updated, 'File content should change.'
-        eq_(0, len(self.problems.all()), 'No errors should be recorded')
+        self.assertEqual(0, len(self.problems.all()), 'No errors should be recorded')
 
-    @requires_image('ruby2')
+    @pytest.mark.requires_linters
     def test_execute_fixer__fewer_problems_remain(self):
         tool = Rubocop(self.problems, {'fixer': True}, root_dir)
 
@@ -115,5 +116,5 @@ class TestRubocop(TestCase):
         tool.process_files(self.fixtures)
 
         read_and_restore_file(self.fixtures[1], original)
-        eq_(1, len(self.problems.all()), 'Most errors should be fixed')
-        assert_in('too long', self.problems.all()[0].body)
+        self.assertEqual(1, len(self.problems.all()), 'Most errors should be fixed')
+        self.assertIn('too long', self.problems.all()[0].body)

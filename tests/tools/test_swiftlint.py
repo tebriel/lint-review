@@ -1,14 +1,16 @@
-from __future__ import absolute_import
 from unittest import TestCase
 
 from lintreview.review import Problems, Comment
 from lintreview.tools.swiftlint import Swiftlint
-from tests import root_dir, requires_image
-from nose.tools import eq_
+from tests import root_dir
+
+import pytest
 
 
 FILE_WITH_NO_ERRORS = 'tests/fixtures/swiftlint/no_errors.swift',
 FILE_WITH_ERRORS = 'tests/fixtures/swiftlint/has_errors.swift'
+
+pytest.skip("This docker doesn't exist", allow_module_level=True)
 
 
 class TestSwiftlint(TestCase):
@@ -25,22 +27,22 @@ class TestSwiftlint(TestCase):
         self.assertTrue(self.tool.match_file('test.swift'))
         self.assertTrue(self.tool.match_file('dir/name/test.swift'))
 
-    @requires_image('swiftlint')
+    @pytest.mark.requires_linters
     def test_check_dependencies(self):
         self.assertTrue(self.tool.check_dependencies())
 
-    @requires_image('swiftlint')
+    @pytest.mark.requires_linters
     def test_process_files_pass(self):
         self.tool.process_files(FILE_WITH_NO_ERRORS)
-        eq_([], self.problems.all(FILE_WITH_NO_ERRORS))
+        self.assertEqual([], self.problems.all(FILE_WITH_NO_ERRORS))
 
-    @requires_image('swiftlint')
+    @pytest.mark.requires_linters
     def test_process_files_fail(self):
         self.tool.process_files([FILE_WITH_ERRORS])
         problems = self.problems.all(FILE_WITH_ERRORS)
-        eq_(1, len(problems))
+        self.assertEqual(1, len(problems))
 
         msg = ("Colons should be next to the identifier when specifying "
                "a type and next to the key in dictionary literals.")
         expected = [Comment(FILE_WITH_ERRORS, 2, 2, msg)]
-        eq_(expected, problems)
+        self.assertEqual(expected, problems)

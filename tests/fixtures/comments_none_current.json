@@ -1,11 +1,16 @@
 [
   {
-    "original_commit_id": "bfad76e1ec505e8611145dbee20388a6abef2758",
-    "url": "https://api.github.com/repos/markstory/asset_compress/pulls/comments/2745637",
-    "original_position": 13,
-    "position": null,
-    "path": "View/Helper/AssetCompressHelper.php",
+    "author_association": "auth_assoc",
     "body": "Spacing is off here.  AssetCompress uses tabs for indentation.",
+    "body_html": "Spacing is off here.  AssetCompress uses tabs for indentation.",
+    "body_text": "Spacing is off here.  AssetCompress uses tabs for indentation.",
+    "original_commit_id": "bfad76e1ec505e8611145dbee20388a6abef2758",
+    "original_position": 13,
+    "path": "View/Helper/AssetCompressHelper.php",
+    "position": null,
+    "url": "https://api.github.com/repos/markstory/asset_compress/pulls/comments/2745637",
+    "html_url": "https://github.com/repos/markstory/asset_compress/pulls/comments/2745637",
+    "issue_url": "https://github.com/repos/markstory/asset_compress/pulls/comments/2745637",
     "_links": {
       "pull_request": {
         "href": "https://api.github.com/repos/markstory/asset_compress/pulls/147"
@@ -18,21 +23,22 @@
       }
     },
     "user": {
-      "type": "User",
+      "avatar_url": "https://secure.gravatar.com/avatar/669144d1ab0a861af5d54175371bc586?d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-user-420.png",
       "events_url": "https://api.github.com/users/markstory/events{/privacy}",
       "followers_url": "https://api.github.com/users/markstory/followers",
-      "url": "https://api.github.com/users/markstory",
-      "gravatar_id": "669144d1ab0a861af5d54175371bc586",
-      "subscriptions_url": "https://api.github.com/users/markstory/subscriptions",
       "following_url": "https://api.github.com/users/markstory/following",
-      "starred_url": "https://api.github.com/users/markstory/starred{/owner}{/repo}",
-      "avatar_url": "https://secure.gravatar.com/avatar/669144d1ab0a861af5d54175371bc586?d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-user-420.png",
-      "login": "markstory",
-      "repos_url": "https://api.github.com/users/markstory/repos",
-      "organizations_url": "https://api.github.com/users/markstory/orgs",
       "gists_url": "https://api.github.com/users/markstory/gists{/gist_id}",
+      "gravatar_id": "669144d1ab0a861af5d54175371bc586",
+      "html_url": "https://github.com/markstory",
+      "id": 24086,
+      "login": "markstory",
+      "organizations_url": "https://api.github.com/users/markstory/orgs",
       "received_events_url": "https://api.github.com/users/markstory/received_events",
-      "id": 24086
+      "repos_url": "https://api.github.com/users/markstory/repos",
+      "starred_url": "https://api.github.com/users/markstory/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/markstory/subscriptions",
+      "type": "User",
+      "url": "https://api.github.com/users/markstory"
     },
     "commit_id": "ae49447aa54dbc38b91c78ccbe1c890af35416c9",
     "updated_at": "2013-01-23T18:22:13Z",
@@ -40,12 +46,17 @@
     "created_at": "2013-01-23T17:54:28Z"
   },
   {
-    "original_commit_id": "bfad76e1ec505e8611145dbee20388a6abef2758",
-    "url": "https://api.github.com/repos/markstory/asset_compress/pulls/comments/2746207",
-    "original_position": 13,
-    "position": null,
-    "path": "View/Helper/AssetCompressHelper.php",
+    "author_association": "auth_assoc",
     "body": "I changed the spaces to tabs.",
+    "body_html": "I changed the spaces to tabs.",
+    "body_text": "I changed the spaces to tabs.",
+    "html_url": "https://api.github.com/repos/markstory/asset_compress/pulls/comments/2746207",
+    "issue_url": "https://api.github.com/repos/markstory/asset_compress/pulls/comments/2746207",
+    "original_commit_id": "bfad76e1ec505e8611145dbee20388a6abef2758",
+    "original_position": 13,
+    "path": "View/Helper/AssetCompressHelper.php",
+    "position": null,
+    "url": "https://api.github.com/repos/markstory/asset_compress/pulls/comments/2746207",
     "_links": {
       "pull_request": {
         "href": "https://api.github.com/repos/markstory/asset_compress/pulls/147"
@@ -58,21 +69,22 @@
       }
     },
     "user": {
-      "type": "User",
+      "avatar_url": "https://secure.gravatar.com/avatar/343063dd1f8a4cd5cb59d926722c6d59?d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-user-420.png",
       "events_url": "https://api.github.com/users/renatodinhani/events{/privacy}",
       "followers_url": "https://api.github.com/users/renatodinhani/followers",
-      "url": "https://api.github.com/users/renatodinhani",
-      "gravatar_id": "343063dd1f8a4cd5cb59d926722c6d59",
-      "subscriptions_url": "https://api.github.com/users/renatodinhani/subscriptions",
       "following_url": "https://api.github.com/users/renatodinhani/following",
-      "starred_url": "https://api.github.com/users/renatodinhani/starred{/owner}{/repo}",
-      "avatar_url": "https://secure.gravatar.com/avatar/343063dd1f8a4cd5cb59d926722c6d59?d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-user-420.png",
-      "login": "renatodinhani",
-      "repos_url": "https://api.github.com/users/renatodinhani/repos",
-      "organizations_url": "https://api.github.com/users/renatodinhani/orgs",
       "gists_url": "https://api.github.com/users/renatodinhani/gists{/gist_id}",
+      "gravatar_id": "343063dd1f8a4cd5cb59d926722c6d59",
+      "html_url": "https://github.com/renatodinhani",
+      "id": 1139781,
+      "login": "renatodinhani",
+      "organizations_url": "https://api.github.com/users/renatodinhani/orgs",
       "received_events_url": "https://api.github.com/users/renatodinhani/received_events",
-      "id": 1139781
+      "repos_url": "https://api.github.com/users/renatodinhani/repos",
+      "starred_url": "https://api.github.com/users/renatodinhani/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/renatodinhani/subscriptions",
+      "type": "User",
+      "url": "https://api.github.com/users/renatodinhani"
     },
     "commit_id": "ae49447aa54dbc38b91c78ccbe1c890af35416c9",
     "updated_at": "2013-01-23T18:29:09Z",

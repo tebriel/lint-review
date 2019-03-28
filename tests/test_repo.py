@@ -1,15 +1,15 @@
-from __future__ import absolute_import
+
 import json
 
 from . import load_fixture
 from contextlib import contextmanager
 from github3.repos.repo import Repository
 from github3.pulls import PullRequest
+from github3 import session
 from lintreview.config import load_config
 from lintreview.repo import GithubRepository
 from lintreview.repo import GithubPullRequest
 from mock import Mock, patch, sentinel
-from nose.tools import eq_, ok_
 from unittest import TestCase
 
 config = load_config()
@@ -18,14 +18,15 @@ config = load_config()
 class TestGithubRepository(TestCase):
     def setUp(self):
         fixture = load_fixture('repository.json')
-        self.repo_model = Repository(json.loads(fixture))
+        self.session = session.GitHubSession()
+        self.repo_model = Repository(json.loads(fixture), self.session)
 
     @patch('lintreview.repo.github')
     def test_repository(self, github_mock):
         github_mock.get_repository.return_value = self.repo_model
         repo = GithubRepository(config, 'markstory', 'lint-test')
 
-        eq_(self.repo_model, repo.repository())
+        self.assertEqual(self.repo_model, repo.repository())
         github_mock.get_repository.assert_called_with(
             config,
             'markstory',
@@ -37,8 +38,8 @@ class TestGithubRepository(TestCase):
         repo = GithubRepository(config, 'markstory', 'lint-test')
         repo.repository = lambda: self.repo_model
         pull = repo.pull_request(1)
-        ok_(isinstance(pull, GithubPullRequest),
-            'Should be wrapped object')
+        self.assertIsInstance(pull, GithubPullRequest,
+                              'Should be wrapped object')
 
     def test_ensure_label__missing(self):
         model = self.repo_model
@@ -60,7 +61,7 @@ class TestGithubRepository(TestCase):
         repo = GithubRepository(config, 'markstory', 'lint-test')
         repo.repository = lambda: self.repo_model
         repo.ensure_label('A label')
-        eq_(False, model.create_label.called)
+        self.assertEqual(False, model.create_label.called)
 
     def test_create_status(self):
         model = self.repo_model
@@ -78,8 +79,10 @@ class TestGithubRepository(TestCase):
 
     def test_create_checkrun(self):
         model = self.repo_model
-        model._post = Mock()
-        model._json = Mock()
+        post_mock = Mock()
+        json_mock = Mock()
+        model._post = post_mock
+        model._json = json_mock
 
         repo = GithubRepository(config, 'markstory', 'lint-test')
         repo.repository = lambda: model
@@ -93,11 +96,11 @@ class TestGithubRepository(TestCase):
             }
         }
         repo.create_checkrun(review)
-        model._post.assert_called_with(
+        post_mock.assert_called_with(
             'https://api.github.com/repos/markstory/lint-test/check-runs',
             data=review,
             headers={'Accept': 'application/vnd.github.antiope-preview+json'})
-        assert model._json.called
+        json_mock.assert_called()
 
     def test_update_checkrun(self):
         model = self.repo_model
@@ -126,7 +129,8 @@ class TestGithubPullRequest(TestCase):
 
     def setUp(self):
         fixture = load_fixture('pull_request.json')
-        self.model = PullRequest(json.loads(fixture)['pull_request'])
+        self.session = session.GitHubSession()
+        self.model = PullRequest(json.loads(fixture)['pull_request'], self.session)
 
     def test_display_name(self):
         pull = GithubPullRequest(self.model)
@@ -217,15 +221,15 @@ class TestGithubPullRequest(TestCase):
 
     def test_maintainer_can_modify__same_repo(self):
         pull = GithubPullRequest(self.model)
-        eq_(True, pull.maintainer_can_modify)
+        self.assertEqual(True, pull.maintainer_can_modify)
 
         fixture = load_fixture('pull_request.json')
         data = json.loads(fixture)['pull_request']
         data['maintainer_can_modify'] = False
 
-        model = PullRequest(data)
+        model = PullRequest(data, self.session)
         pull = GithubPullRequest(model)
-        eq_(True, pull.maintainer_can_modify)
+        self.assertEqual(True, pull.maintainer_can_modify)
 
     def test_maintainer_can_modify__forked_repo(self):
         fixture = load_fixture('pull_request.json')
@@ -233,26 +237,26 @@ class TestGithubPullRequest(TestCase):
 
         # Make repo different
         data['head']['repo']['full_name'] = 'contributor/lint-test'
-        pull = GithubPullRequest(PullRequest(data))
-        eq_(True, pull.maintainer_can_modify, 'reflects flag')
+        pull = GithubPullRequest(PullRequest(data, self.session))
+        self.assertEqual(True, pull.maintainer_can_modify, 'reflects flag')
 
         # Different repo reflects flag data
         data['maintainer_can_modify'] = False
-        pull = GithubPullRequest(PullRequest(data))
-        eq_(False, pull.maintainer_can_modify)
+        pull = GithubPullRequest(PullRequest(data, self.session))
+        self.assertEqual(False, pull.maintainer_can_modify)
 
         data['maintainer_can_modify'] = True
-        pull = GithubPullRequest(PullRequest(data))
-        eq_(True, pull.maintainer_can_modify)
+        pull = GithubPullRequest(PullRequest(data, self.session))
+        self.assertEqual(True, pull.maintainer_can_modify)
 
     def test_clone_url__private_fork__not_a_fork(self):
         fixture = load_fixture('pull_request.json')
         data = json.loads(fixture)['pull_request']
 
-        pull = GithubPullRequest(PullRequest(data))
-        eq_(False, pull.from_private_fork)
-        eq_(data['head']['repo']['clone_url'], pull.clone_url)
-        eq_('test', pull.head_branch)
+        pull = GithubPullRequest(PullRequest(data, self.session))
+        self.assertEqual(False, pull.from_private_fork)
+        self.assertEqual(data['head']['repo']['clone_url'], pull.clone_url)
+        self.assertEqual('test', pull.head_branch)
 
     def test_clone_url__private_fork__forked(self):
         fixture = load_fixture('pull_request.json')
@@ -261,8 +265,8 @@ class TestGithubPullRequest(TestCase):
         data['head']['repo']['full_name'] = 'contributor/lint-test'
         data['head']['repo']['fork'] = True
 
-        pull = GithubPullRequest(PullRequest(data))
-        eq_(False, pull.from_private_fork)
+        pull = GithubPullRequest(PullRequest(data, self.session))
+        self.assertEqual(False, pull.from_private_fork)
 
     def test_clone_url__private_fork(self):
         fixture = load_fixture('pull_request.json')
@@ -272,10 +276,10 @@ class TestGithubPullRequest(TestCase):
         data['head']['repo']['clone_url'] = 'secret-repo'
         data['head']['repo']['fork'] = True
         data['head']['repo']['private'] = True
-        pull = GithubPullRequest(PullRequest(data))
-        eq_(True, pull.from_private_fork)
-        eq_(data['base']['repo']['clone_url'], pull.clone_url)
-        eq_('refs/pull/1/head', pull.head_branch)
+        pull = GithubPullRequest(PullRequest(data, self.session))
+        self.assertEqual(True, pull.from_private_fork)
+        self.assertEqual(data['base']['repo']['clone_url'], pull.clone_url)
+        self.assertEqual('refs/pull/1/head', pull.head_branch)
 
 
 @contextmanager

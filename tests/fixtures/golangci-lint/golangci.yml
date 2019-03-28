@@ -1,0 +1,10 @@
+---
+linters-settings:
+  golint:
+    min-confidence: 0.3
+issues:
+  exclude-rules:
+    - linters:
+        - golint
+      text: should have comment
+      path: has_errors\.go

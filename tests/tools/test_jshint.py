@@ -1,9 +1,9 @@
-from __future__ import absolute_import
 from lintreview.review import Problems, Comment
 from lintreview.tools.jshint import Jshint
 from unittest import TestCase
-from nose.tools import eq_
-from tests import root_dir, requires_image
+from tests import root_dir
+
+import pytest
 
 
 class TestJshint(TestCase):
@@ -25,52 +25,52 @@ class TestJshint(TestCase):
         self.assertTrue(self.tool.match_file('test.js'))
         self.assertTrue(self.tool.match_file('dir/name/test.js'))
 
-    @requires_image('nodejs')
+    @pytest.mark.requires_linters
     def test_check_dependencies(self):
         self.assertTrue(self.tool.check_dependencies())
 
-    @requires_image('nodejs')
+    @pytest.mark.requires_linters
     def test_process_files__one_file_pass(self):
         self.tool.process_files([self.fixtures[0]])
-        eq_([], self.problems.all(self.fixtures[0]))
+        self.assertEqual([], self.problems.all(self.fixtures[0]))
 
-    @requires_image('nodejs')
+    @pytest.mark.requires_linters
     def test_process_files__one_file_fail(self):
         self.tool.process_files([self.fixtures[1]])
         problems = self.problems.all(self.fixtures[1])
-        eq_(3, len(problems))
+        self.assertEqual(3, len(problems))
 
         fname = self.fixtures[1]
         expected = Comment(fname, 1, 1,
-                           'Missing name in function declaration.')
-        eq_(expected, problems[0])
+                           'Missing name in function declaration. (jshint.W025)')
+        self.assertEqual(expected, problems[0])
 
-        expected = Comment(fname, 4, 4, "Missing semicolon.")
-        eq_(expected, problems[1])
+        expected = Comment(fname, 4, 4, "Missing semicolon. (jshint.W033)")
+        self.assertEqual(expected, problems[1])
 
-    @requires_image('nodejs')
+    @pytest.mark.requires_linters
     def test_process_files__multiple_error(self):
         self.tool.process_files([self.fixtures[2]])
         problems = self.problems.all(self.fixtures[2])
-        eq_(6, len(problems))
+        self.assertEqual(6, len(problems))
 
         fname = self.fixtures[2]
-        expected = Comment(fname, 9, 9, "Missing semicolon.")
-        eq_(expected, problems[2])
+        expected = Comment(fname, 9, 9, "Missing semicolon. (jshint.W033)")
+        self.assertEqual(expected, problems[2])
 
-        expected = Comment(fname, 5, 5, "'go' is not defined.")
-        eq_(expected, problems[4])
+        expected = Comment(fname, 5, 5, "'go' is not defined. (jshint.W117)")
+        self.assertEqual(expected, problems[4])
 
-    @requires_image('nodejs')
+    @pytest.mark.requires_linters
     def test_process_files_two_files(self):
         self.tool.process_files(self.fixtures)
 
-        eq_([], self.problems.all(self.fixtures[0]))
+        self.assertEqual([], self.problems.all(self.fixtures[0]))
 
         problems = self.problems.all(self.fixtures[1])
-        eq_(3, len(problems))
+        self.assertEqual(3, len(problems))
 
-    @requires_image('nodejs')
+    @pytest.mark.requires_linters
     def test_process_files_with_config(self):
         config = {
             'config': 'tests/fixtures/jshint/config.json'
@@ -80,7 +80,7 @@ class TestJshint(TestCase):
 
         problems = self.problems.all(self.fixtures[1])
 
-        eq_(3, len(problems), 'Config file should lower error count.')
+        self.assertEqual(3, len(problems), 'Config file should lower error count.')
 
     def test_create_command__with_path_based_standard(self):
         config = {
@@ -94,4 +94,4 @@ class TestJshint(TestCase):
             'some/file.js'
         ]
         assert 'jshint' in result[0], 'jshint is in command name'
-        eq_(result[1:], expected)
+        self.assertEqual(result[1:], expected)

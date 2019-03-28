@@ -1,13 +1,14 @@
-from __future__ import absolute_import
+
 from . import load_fixture, fixer_ini, create_pull_files
+from unittest import TestCase
 from lintreview.config import build_review_config
 from lintreview.diff import DiffCollection
 from lintreview.processor import Processor
 from lintreview.repo import GithubPullRequest
 from lintreview.fixers.error import ConfigurationError, WorkflowError
 from github3.pulls import PullRequest
+from github3.session import GitHubSession
 from mock import patch, sentinel, Mock, ANY
-from nose.tools import eq_, raises
 import json
 
 
@@ -18,11 +19,14 @@ app_config = {
 }
 
 
-class TestProcessor(object):
+class TestProcessor(TestCase):
+
+    def setUp(self):
+        self.session = GitHubSession()
 
     def get_pull_request(self):
         fixture = load_fixture('pull_request.json')
-        model = PullRequest(json.loads(fixture)['pull_request'])
+        model = PullRequest(json.loads(fixture)['pull_request'], self.session)
 
         files = load_fixture('one_file_pull_request.json')
         model.files = lambda: create_pull_files(files)
@@ -37,17 +41,17 @@ class TestProcessor(object):
         subject = Processor(repo, pull, './tests', config)
         subject.load_changes()
 
-        eq_(1, len(subject._changes), 'File count is wrong')
+        self.assertEqual(1, len(subject._changes), 'File count is wrong')
         assert isinstance(subject._changes, DiffCollection)
 
-    @raises(RuntimeError)
     def test_run_tools__no_changes(self):
         pull = self.get_pull_request()
         repo = Mock()
 
         config = build_review_config('', app_config)
         subject = Processor(repo, pull, './tests', config)
-        subject.run_tools()
+        self.assertRaises(RuntimeError,
+                          subject.run_tools)
 
     @patch('lintreview.processor.tools')
     @patch('lintreview.processor.fixers')
@@ -117,10 +121,9 @@ class TestProcessor(object):
 
         assert fixer_stub.create_context.called
         assert fixer_stub.run_fixers.called
-        eq_(False, fixer_stub.apply_fixer_diff.called)
-        eq_(True,
-            fixer_stub.rollback_changes.called,
-            'Runtime error should trigger git reset.')
+        self.assertFalse(fixer_stub.apply_fixer_diff.called)
+        self.assertTrue(fixer_stub.rollback_changes.called,
+                        'Runtime error should trigger git reset.')
         assert tool_stub.run.called, 'Should have ran'
 
     def test_run_tools__fixer_errors(self):
@@ -152,12 +155,11 @@ class TestProcessor(object):
         assert fixer_stub.create_context.called
         assert fixer_stub.run_fixers.called
         assert tool_stub.run.called, 'Should have ran'
-        eq_(False,
-            fixer_stub.rollback_changes.called,
-            'No rollback on strategy failure')
-        eq_(1, len(subject.problems), 'strategy error adds pull comment')
-        eq_('Unable to apply fixers. ' + str(error),
-            subject.problems.all()[0].body)
+        self.assertFalse(fixer_stub.rollback_changes.called,
+                         'No rollback on strategy failure')
+        self.assertEqual(1, len(subject.problems), 'strategy error adds pull comment')
+        self.assertEqual('Unable to apply fixers. ' + str(error),
+                         subject.problems.all()[0].body)
 
     def test_publish(self):
         pull = self.get_pull_request()
@@ -169,12 +171,10 @@ class TestProcessor(object):
         subject._review = Mock()
 
         subject.publish()
-        eq_(True,
-            subject.problems.limit_to_changes.called,
-            'Problems should be filtered.')
-        eq_(True,
-            subject._review.publish_review.called,
-            'Review should be published.')
+        self.assertTrue(subject.problems.limit_to_changes.called,
+                        'Problems should be filtered.')
+        self.assertTrue(subject._review.publish_review.called,
+                        'Review should be published.')
         subject._review.publish_review.assert_called_with(
             subject.problems,
             pull.head)
@@ -189,12 +189,12 @@ class TestProcessor(object):
         subject._review = Mock()
 
         subject.publish(check_run_id=9)
-        eq_(True,
-            subject.problems.limit_to_changes.called,
-            'Problems should be filtered.')
-        eq_(True,
-            subject._review.publish_checkrun.called,
-            'Review should be published.')
+        self.assertEqual(True,
+                         subject.problems.limit_to_changes.called,
+                         'Problems should be filtered.')
+        self.assertEqual(True,
+                         subject._review.publish_checkrun.called,
+                         'Review should be published.')
         subject._review.publish_checkrun.assert_called_with(
             subject.problems,
             9)

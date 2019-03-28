@@ -1,9 +1,8 @@
-from __future__ import absolute_import
 from lintreview.review import Problems
 from lintreview.tools.black import Black
 from unittest import TestCase
-from nose.tools import eq_, assert_in, assert_not_in
-from tests import root_dir, read_file, read_and_restore_file, requires_image
+from tests import root_dir, read_file, read_and_restore_file
+import pytest
 
 
 class TestBlack(TestCase):
@@ -24,38 +23,38 @@ class TestBlack(TestCase):
         self.assertTrue(self.tool.match_file('test.py'))
         self.assertTrue(self.tool.match_file('dir/name/test.py'))
 
-    @requires_image('python3')
+    @pytest.mark.requires_linters
     def test_process_files__one_file_pass(self):
         self.tool.process_files([self.fixtures[0]])
-        eq_([], self.problems.all(self.fixtures[0]))
+        self.assertEqual([], self.problems.all(self.fixtures[0]))
 
-    @requires_image('python3')
+    @pytest.mark.requires_linters
     def test_process_files__one_file_fail(self):
         self.tool.process_files([self.fixtures[1]])
         problems = self.problems.all()
 
-        eq_(1, len(problems))
-        assert_in('* ' + self.fixtures[1], problems[0].body)
+        self.assertEqual(1, len(problems))
+        self.assertIn('* ' + self.fixtures[1], problems[0].body)
 
-    @requires_image('python3')
+    @pytest.mark.requires_linters
     def test_process_files_two_files(self):
         self.tool.process_files(self.fixtures)
 
         problems = self.problems.all()
-        eq_(1, len(problems))
+        self.assertEqual(1, len(problems))
 
-        assert_in('do not match the `black` styleguide', problems[0].body)
-        assert_in('* ' + self.fixtures[1], problems[0].body)
-        assert_not_in(self.fixtures[0], problems[0].body)
+        self.assertIn('do not match the `black` styleguide', problems[0].body)
+        self.assertIn('* ' + self.fixtures[1], problems[0].body)
+        self.assertNotIn(self.fixtures[0], problems[0].body)
 
-    @requires_image('python3')
+    @pytest.mark.requires_linters
     def test_process_absolute_container_path(self):
         fixtures = ['/src/' + path for path in self.fixtures]
         self.tool.process_files(fixtures)
 
-        eq_(1, len(self.problems.all()))
+        self.assertEqual(1, len(self.problems.all()))
 
-    @requires_image('python3')
+    @pytest.mark.requires_linters
     def test_process_files__config(self):
         options = {
             'config': 'tests/fixtures/black/pyproject.toml'
@@ -64,18 +63,18 @@ class TestBlack(TestCase):
         self.tool.process_files([self.fixtures[1]])
 
         problems = self.problems.all()
-        eq_(1, len(problems))
-        assert_in(self.fixtures[1], problems[0].body)
+        self.assertEqual(1, len(problems))
+        self.assertIn(self.fixtures[1], problems[0].body)
 
     def test_has_fixer__not_enabled(self):
         tool = Black(self.problems, {})
-        eq_(False, tool.has_fixer())
+        self.assertEqual(False, tool.has_fixer())
 
     def test_has_fixer__enabled(self):
         tool = Black(self.problems, {'fixer': True})
-        eq_(True, tool.has_fixer())
+        self.assertEqual(True, tool.has_fixer())
 
-    @requires_image('python3')
+    @pytest.mark.requires_linters
     def test_execute_fixer(self):
         tool = Black(self.problems, {'fixer': True}, root_dir)
 
@@ -85,4 +84,4 @@ class TestBlack(TestCase):
 
         updated = read_and_restore_file(self.fixtures[1], original)
         assert original != updated, 'File content should change.'
-        eq_(0, len(self.problems.all()), 'No errors should be recorded')
+        self.assertEqual(0, len(self.problems.all()), 'No errors should be recorded')

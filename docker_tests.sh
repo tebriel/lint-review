@@ -3,6 +3,10 @@ git config --global user.name dockerbot
 git config --global user.email dockerbot@example.com
 
 pip install -r requirements-dev.txt
-pip install codecov coverage
 
-nosetests --with-coverage --cover-package lintreview
+pytest \
+    -p no:cacheprovider \
+    --requires_linters \
+    --cov=lintreview \
+    --cov-report=xml:/data/results/coverage.xml \
+    --junitxml=/data/results/nosetests.xml

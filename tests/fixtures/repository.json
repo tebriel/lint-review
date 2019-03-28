@@ -21,6 +21,8 @@
     "type": "User",
     "site_admin": false
   },
+  "archived": false,
+  "has_projects": false,
   "private": false,
   "html_url": "https://github.com/markstory/lint-test",
   "description": "Test repo for checking lint-review functionality. This will probably get deleted",

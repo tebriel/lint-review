@@ -1,10 +1,10 @@
-from __future__ import absolute_import
 from lintreview.review import Problems, Comment
 from lintreview.tools.puppet import Puppet
 from unittest import TestCase
-from nose.tools import eq_, assert_in
 from operator import attrgetter
-from tests import root_dir, requires_image, read_file, read_and_restore_file
+from tests import root_dir, read_file, read_and_restore_file
+
+import pytest
 
 
 class TestPuppet(TestCase):
@@ -24,12 +24,12 @@ class TestPuppet(TestCase):
         self.assertTrue(self.tool.match_file('test.pp'))
         self.assertTrue(self.tool.match_file('dir/name/test.pp'))
 
-    @requires_image('ruby2')
+    @pytest.mark.requires_linters
     def test_process_files__one_file_pass(self):
         self.tool.process_files([self.fixtures[0]])
-        eq_([], self.problems.all(self.fixtures[0]))
+        self.assertEqual([], self.problems.all(self.fixtures[0]))
 
-    @requires_image('ruby2')
+    @pytest.mark.requires_linters
     def test_process_files__one_file_fail(self):
         filename = self.fixtures[1]
         self.tool.process_files([filename])
@@ -40,19 +40,19 @@ class TestPuppet(TestCase):
         ]
 
         problems = sorted(self.problems.all(filename), key=attrgetter('line'))
-        eq_(expected_problems, problems)
+        self.assertEqual(expected_problems, problems)
 
-    @requires_image('ruby2')
+    @pytest.mark.requires_linters
     def test_process_files_two_files(self):
         self.tool.process_files(self.fixtures)
 
         linty_filename = self.fixtures[1]
-        eq_(3, len(self.problems.all(linty_filename)))
+        self.assertEqual(3, len(self.problems.all(linty_filename)))
 
         freshly_laundered_filename = self.fixtures[0]
-        eq_([], self.problems.all(freshly_laundered_filename))
+        self.assertEqual([], self.problems.all(freshly_laundered_filename))
 
-    @requires_image('ruby2')
+    @pytest.mark.requires_linters
     def test_process_files__with_config(self):
         config = {
             'config': 'tests/fixtures/puppet/puppetlint.rc'
@@ -60,18 +60,18 @@ class TestPuppet(TestCase):
         tool = Puppet(self.problems, config)
         tool.process_files([self.fixtures[1]])
 
-        eq_([], self.problems.all(self.fixtures[1]),
+        self.assertEqual([], self.problems.all(self.fixtures[1]),
             'Config file should cause no errors on has_errors.pp')
 
     def test_has_fixer__not_enabled(self):
         tool = Puppet(self.problems, {}, root_dir)
-        eq_(False, tool.has_fixer())
+        self.assertEqual(False, tool.has_fixer())
 
     def test_has_fixer__enabled(self):
         tool = Puppet(self.problems, {'fixer': True}, root_dir)
-        eq_(True, tool.has_fixer())
+        self.assertEqual(True, tool.has_fixer())
 
-    @requires_image('ruby2')
+    @pytest.mark.requires_linters
     def test_execute_fixer(self):
         tool = Puppet(self.problems, {'fixer': True}, root_dir)
 
@@ -80,9 +80,9 @@ class TestPuppet(TestCase):
 
         updated = read_and_restore_file(self.fixtures[1], original)
         assert original != updated, 'File content should change.'
-        eq_(0, len(self.problems.all()), 'No errors should be recorded')
+        self.assertEqual(0, len(self.problems.all()), 'No errors should be recorded')
 
-    @requires_image('ruby2')
+    @pytest.mark.requires_linters
     def test_execute_fixer__fewer_problems_remain(self):
         tool = Puppet(self.problems, {'fixer': True}, root_dir)
 
@@ -92,10 +92,10 @@ class TestPuppet(TestCase):
         tool.process_files(self.fixtures)
 
         read_and_restore_file(self.fixtures[1], original)
-        eq_(1, len(self.problems.all()), 'Most errors should be fixed')
-        assert_in('autoload module layout', self.problems.all()[0].body)
+        self.assertEqual(1, len(self.problems.all()), 'Most errors should be fixed')
+        self.assertIn('autoload module layout', self.problems.all()[0].body)
 
-    @requires_image('ruby2')
+    @pytest.mark.requires_linters
     def test_execute_fixer__fixer_ignore(self):
         puppet_config = {
             'fixer': True,
@@ -108,8 +108,8 @@ class TestPuppet(TestCase):
         tool.process_files(self.fixtures)
 
         read_and_restore_file(self.fixtures[1], original)
-        eq_(2, len(self.problems.all()), 'Most errors should be fixed')
+        self.assertEqual(2, len(self.problems.all()), 'Most errors should be fixed')
 
         problems = sorted(self.problems.all(), key=attrgetter('line'))
-        assert_in('ERROR:foo not in autoload module layout', problems[0].body)
-        assert_in('WARNING:quoted boolean value', problems[1].body)
+        self.assertIn('ERROR:foo not in autoload module layout', problems[0].body)
+        self.assertIn('WARNING:quoted boolean value', problems[1].body)
